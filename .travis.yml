@@ -1,0 +1,50 @@
+---
+dist: bionic  # Ubuntu 18.04
+language: minimal
+
+matrix:
+  include:
+    - name: Linter-Dockerfile (hadolint)
+      language: minimal
+      services:
+        - docker
+      before_install:
+        - docker pull hadolint/hadolint
+      script:
+        - >
+          docker run --rm -i
+          -v ${PWD}/.conf/hadolint.yml:/conf/hadolint.yaml:Z
+          -e XDG_CONFIG_HOME=/conf hadolint/hadolint
+          < Dockerfile
+
+    - name: Linter-Python (flake8)
+      language: python
+      python: 3.8
+      before_install:
+        - pip install flake8
+      script:
+        - flake8 --config=./.conf/flake8.cfg .
+
+    - name: Linter-Ruby (rubocop)
+      language: ruby
+      rvm: 2.7.1
+      before_install:
+        - gem install rubocop
+      script:
+        - rubocop --config ./.conf/rubocop.yml .
+
+    - name: Linter-Markdown (markdownlint)
+      language: ruby
+      rvm: 2.7.1
+      before_install:
+        - gem install mdl
+      script:
+        - mdl --style ./.conf/markdownlint.rb .
+
+    - name: Linter-YAML (yamllint)
+      language: python
+      python: 3.8
+      before_install:
+        - pip install yamllint
+      script:
+        - yamllint --config-file ./.conf/yamllint.yml .
